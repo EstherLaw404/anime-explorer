@@ -1,6 +1,16 @@
 import axios from "axios";
 
 export const fetchAnimeList = async () => {
-  const res = await axios.get("https://api.jikan.moe/v4/anime");
-  return res.data.data; // ✅ return only the array
+  try {
+    const res = await axios.get("https://api.jikan.moe/v4/anime");
+
+    console.log("Full response:", res);
+    console.log("Response data:", res.data);
+    console.log("Anime list:", res.data.data);
+
+    return res.data.data;
+  } catch (error) {
+    console.error("Error fetching anime list:", error);
+    throw error;
+  }
 };

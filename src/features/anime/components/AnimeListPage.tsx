@@ -6,5 +6,6 @@ export function AnimeListPage() {
   const { anime, loading } = useAnime();
 
   if (loading) return <Loader />;
+
   return <AnimeGrid anime={anime} />;
 }
