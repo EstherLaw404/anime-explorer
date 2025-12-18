@@ -1,21 +1,12 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Anime } from "../types/anime";
 
 export function AnimeDetailPage() {
   const location = useLocation();
   const { anime } = location.state as { anime: Anime };
-  const navigate = useNavigate();
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-6">
-      {/* Back button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded shadow"
-      >
-        ← Back
-      </button>
-
       {/* Top section: image + main info */}
       <div className="flex flex-col md:flex-row gap-6">
         {/* Anime image */}

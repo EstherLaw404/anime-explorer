@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Anime } from "../types/anime";
 import { fetchAnimeList } from "../api/anime.api";
 
-export function useAnime() {
+export function useAnime(genreId?: number) {
   const [anime, setAnime] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -15,6 +15,13 @@ export function useAnime() {
   useEffect(() => {
     hasMoreRef.current = hasMore;
   }, [hasMore]);
+
+  // RESET when genre changes
+  useEffect(() => {
+    setAnime([]);
+    setPage(1);
+    setHasMore(true);
+  }, [genreId]);
 
   // Track fetched pages to prevent double fetch
   const fetchedPagesRef = useRef<Set<number>>(new Set());
@@ -29,7 +36,7 @@ export function useAnime() {
       setLoading(true);
 
       try {
-        const data = await fetchAnimeList(currentPage);
+        const data = await fetchAnimeList(currentPage, genreId);
 
         setAnime((prev) => {
           const newAnime = data.filter(
@@ -46,7 +53,7 @@ export function useAnime() {
         setLoading(false);
       }
     },
-    [loading]
+    [loading, genreId]
   );
 
   // Initial fetch (page 1)
