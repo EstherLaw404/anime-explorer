@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
 import { Anime } from "../types/anime";
+import { fetchAnimeList } from "../api/anime.api";
 
 export function useAnime() {
   const [anime, setAnime] = useState<Anime[]>([]);
@@ -8,62 +8,71 @@ export function useAnime() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const hasMoreRef = useRef(true);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const hasMoreRef = useRef(true);
 
-  // Keep ref in sync
+  // Keep hasMore ref in sync
   useEffect(() => {
     hasMoreRef.current = hasMore;
   }, [hasMore]);
 
-  // Fetch anime function
-  const fetchAnime = useCallback(async () => {
-    if (!hasMoreRef.current) return;
+  // Track fetched pages to prevent double fetch
+  const fetchedPagesRef = useRef<Set<number>>(new Set());
 
-    setLoading(true);
-    try {
-      const res = await axios.get(`https://api.jikan.moe/v4/anime?page=${page}`);
+  // Fetch a specific page
+  const fetchAnimePage = useCallback(
+    async (currentPage: number) => {
+      if (!hasMoreRef.current || loading) return;
+      if (fetchedPagesRef.current.has(currentPage)) return;
 
-      setAnime((prev) => {
-        const newAnime = res.data.data.filter(
-          (a: Anime) => !prev.some((p) => p.mal_id === a.mal_id)
-        );
-        return [...prev, ...newAnime];
-      });
+      fetchedPagesRef.current.add(currentPage);
+      setLoading(true);
 
-      setHasMore(res.data.pagination.has_next_page);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [page]);
+      try {
+        const data = await fetchAnimeList(currentPage);
 
-  // Fetch whenever page changes
+        setAnime((prev) => {
+          const newAnime = data.filter(
+            (a: Anime) => !prev.some((p) => p.mal_id === a.mal_id)
+          );
+          return [...prev, ...newAnime];
+        });
+
+        // Stop if API returns empty data
+        setHasMore(data.length > 0);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loading]
+  );
+
+  // Initial fetch (page 1)
   useEffect(() => {
-    fetchAnime();
-  }, [fetchAnime]);
+    fetchAnimePage(1);
+  }, [fetchAnimePage]);
 
-  // Intersection Observer
+  // IntersectionObserver for infinite scroll
   useEffect(() => {
-    const node = loadMoreRef.current; // copy ref to local variable
+    const node = loadMoreRef.current;
     if (!node) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMoreRef.current && !loading) {
+          // fetch current page and then increment page
+          fetchAnimePage(page);
           setPage((prev) => prev + 1);
         }
       },
-      { rootMargin: "200px" } // load before reaching bottom
+      { rootMargin: "200px" } // fetch before reaching bottom
     );
 
     observer.observe(node);
-
-    return () => {
-      observer.unobserve(node); // cleanup
-    };
-  }, [loading]); // we can keep loading as dependency for safety
+    return () => observer.unobserve(node);
+  }, [fetchAnimePage, loading, page]);
 
   return { anime, loading, loadMoreRef };
 }
