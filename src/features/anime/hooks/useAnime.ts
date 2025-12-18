@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { Anime } from "../types/anime";
 
@@ -9,57 +9,61 @@ export function useAnime() {
   const [hasMore, setHasMore] = useState(true);
 
   const hasMoreRef = useRef(true);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // keep ref in sync
+  // Keep ref in sync
   useEffect(() => {
     hasMoreRef.current = hasMore;
   }, [hasMore]);
 
-  // fetch data when page changes
-  useEffect(() => {
-    const loadAnime = async () => {
-      if (!hasMoreRef.current) return;
+  // Fetch anime function
+  const fetchAnime = useCallback(async () => {
+    if (!hasMoreRef.current) return;
 
-      setLoading(true);
-      try {
-        const res = await axios.get(
-          `https://api.jikan.moe/v4/anime?page=${page}`
+    setLoading(true);
+    try {
+      const res = await axios.get(`https://api.jikan.moe/v4/anime?page=${page}`);
+
+      setAnime((prev) => {
+        const newAnime = res.data.data.filter(
+          (a: Anime) => !prev.some((p) => p.mal_id === a.mal_id)
         );
+        return [...prev, ...newAnime];
+      });
 
-        setAnime((prev) => {
-          const newAnime = res.data.data.filter(
-            (a: Anime) => !prev.some((p) => p.mal_id === a.mal_id)
-          );
-          return [...prev, ...newAnime];
-        });
+      setHasMore(res.data.pagination.has_next_page);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page]);
 
-        setHasMore(res.data.pagination.has_next_page);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAnime();
-  }, [page]); // ✅ eslint happy
-
-  // infinite scroll
+  // Fetch whenever page changes
   useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + window.scrollY >=
-          document.body.offsetHeight - 500 &&
-        !loading &&
-        hasMoreRef.current
-      ) {
-        setPage((prev) => prev + 1);
-      }
+    fetchAnime();
+  }, [fetchAnime]);
+
+  // Intersection Observer
+  useEffect(() => {
+    const node = loadMoreRef.current; // copy ref to local variable
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreRef.current && !loading) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { rootMargin: "200px" } // load before reaching bottom
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer.unobserve(node); // cleanup
     };
+  }, [loading]); // we can keep loading as dependency for safety
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [loading]);
-
-  return { anime, loading };
+  return { anime, loading, loadMoreRef };
 }

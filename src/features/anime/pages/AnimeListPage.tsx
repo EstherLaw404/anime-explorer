@@ -3,8 +3,13 @@ import { AnimeGrid } from "../components/AnimeGrid";
 import { Loader } from "../../../shared/ui/Loader";
 
 export function AnimeListPage() {
-  const { anime, loading } = useAnime();
+  const { anime, loading, loadMoreRef } = useAnime();
 
-  if (loading) return <Loader />;
-  return <AnimeGrid anime={anime} />;
+  return (
+    <>
+      <AnimeGrid anime={anime} />
+      {loading && <Loader />}
+      <div ref={loadMoreRef} /> {/* Sentinel element */}
+    </>
+  );
 }
