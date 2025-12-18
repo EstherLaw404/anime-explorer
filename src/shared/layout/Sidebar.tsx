@@ -17,12 +17,12 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed md:static top-0 left-0 h-screen w-64 bg-white shadow-lg
+          fixed md:static top-0 left-0 h-screen w-64 bg-gray-900 shadow-lg
           transform transition-transform duration-300 z-40
           ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
-        <div className="p-4 font-bold text-xl border-b">
+        <div className="p-4 font-bold text-xl border-b bg-gray-900 text-white">
           Anime Explorer
         </div>
 
@@ -31,7 +31,7 @@ export function Sidebar() {
             to="/"
             className={({ isActive }) =>
               `p-2 rounded ${
-                isActive ? "bg-blue-500 text-white" : "hover:bg-gray-100"
+                isActive ? "bg-gray-700 text-white" : "hover:bg-teal-600 text-gray-200"
               }`
             }
             onClick={() => setOpen(false)}
@@ -43,7 +43,7 @@ export function Sidebar() {
             to="/favorites"
             className={({ isActive }) =>
               `p-2 rounded ${
-                isActive ? "bg-blue-500 text-white" : "hover:bg-gray-100"
+                isActive ? "bg-gray-700 text-white" : "hover:bg-gray-600 text-gray-200"
               }`
             }
             onClick={() => setOpen(false)}

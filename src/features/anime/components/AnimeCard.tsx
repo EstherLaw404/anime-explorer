@@ -25,11 +25,11 @@ export function AnimeCard({ anime }: { anime: Anime }) {
         alt={anime.title}
         loading="lazy"
         onClick={handleClick}
-        className="w-full h-full object-cover"
+        className="w-full h-80 object-cover"
       />
 
       {/* Title & score */}
-      <div className="p-2" onClick={handleClick}>
+      <div className="p-2 bg-white h-full" onClick={handleClick}>
         <h3 className="font-bold">{anime.title}</h3>
         {anime.score && <p>Score: {anime.score}</p>}
       </div>

@@ -3,7 +3,7 @@ import { Sidebar } from "./Sidebar";
 
 export function MainLayout() {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-800">
       {/* Sidebar takes width naturally */}
       <Sidebar />
 
