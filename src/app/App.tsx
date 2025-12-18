@@ -1,12 +1,6 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
-import { AnimeListPage, AnimeDetailPage } from "../features/anime";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
 
 export default function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<AnimeListPage />} />
-      <Route path="/:id" element={<AnimeDetailPage />} />
-    </Routes>
-  );
+  return <RouterProvider router={router} />;
 }
