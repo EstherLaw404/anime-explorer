@@ -31,7 +31,7 @@ export function Sidebar() {
             to="/"
             className={({ isActive }) =>
               `p-2 rounded ${
-                isActive ? "bg-gray-700 text-white" : "hover:bg-teal-600 text-gray-200"
+                isActive ? "bg-gray-700 text-white" : "hover:bg-gray-600 text-gray-200"
               }`
             }
             onClick={() => setOpen(false)}

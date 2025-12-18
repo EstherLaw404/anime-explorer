@@ -4,7 +4,7 @@ import { AnimeGrid } from "../../anime/components/AnimeGrid";
 export function FavoritesPage() {
   const { favorites } = useFavoriteStore();
 
-  if (favorites.length === 0) return <p className="p-4">No favorites yet 😢</p>;
+  if (favorites.length === 0) return <p className="p-4 text-white">No favorites yet 😢</p>;
 
   return <AnimeGrid anime={favorites} />;
 }
