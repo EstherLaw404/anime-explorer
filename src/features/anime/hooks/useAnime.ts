@@ -21,6 +21,7 @@ export function useAnime(genreId?: number) {
     setAnime([]);
     setPage(1);
     setHasMore(true);
+    fetchedPagesRef.current.clear(); // prevents skipping page 1
   }, [genreId]);
 
   // Track fetched pages to prevent double fetch
@@ -58,8 +59,10 @@ export function useAnime(genreId?: number) {
 
   // Initial fetch (page 1)
   useEffect(() => {
-    fetchAnimePage(1);
+    const timer = setTimeout(() => fetchAnimePage(1), 300); // 300ms delay
+    return () => clearTimeout(timer);
   }, [fetchAnimePage]);
+  
 
   // IntersectionObserver for infinite scroll
   useEffect(() => {
